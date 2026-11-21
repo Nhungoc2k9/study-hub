@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STUDY HUB | Không gian học tập</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="header">
+    <a class="logo" href="#">✦ STUDY HUB</a>
+    <nav>
+        <button data-page="home">Trang chủ</button>
+        <button data-page="quiz">Kiểm tra</button>
+        <button data-page="game">Trò chơi</button>
+        <button data-page="knowledge">📚 Kho kiến thức</button>
+    </nav>
+</header>
+
+<main>
+
+    <!-- TRANG CHỦ -->
+    <section id="home" class="page active">
+        <div class="hero">
+            <span class="tag">YOUR LEARNING SPACE ✨</span>
+            <h1>Học tập thông minh.<br>
+                <span>Chinh phục tri thức.</span>
+            </h1>
+            <p>Mỗi ngày một chút tiến bộ, mỗi thử thách
+               là một cơ hội để trưởng thành.</p>
+            <button class="primary" data-page="quiz">
+                Bắt đầu học ngay →
+            </button>
+        </div>
+
+       
+<h2>Khám phá không gian học tập</h2>
+
+<div class="cards">
+
+    <button class="card" type="button" data-page="knowledge">
+        <span>📚</span>
+        <h3>Kho kiến thức</h3>
+        <p>Tổng hợp kiến thức và công thức cần nhớ.</p>
+    </button>
+
+    <button class="card" data-page="quiz">
+        <span>📝</span>
+        <h3>Kiểm tra trực tuyến</h3>
+        <p>Luyện tập và nhận kết quả tức thì.</p>
+    </button>
+
+    <button class="card" data-page="game">
+        <span>🎮</span>
+        <h3>Trò chơi kiến thức</h3>
+        <p>Học tập qua những thử thách thú vị.</p>
+    </button>
+
+</div>
+    </section>
+
+    <!-- KIỂM TRA TRỰC TUYẾN -->
+    <section id="quiz" class="page">
+
+        <div id="subject-selection">
+            <h2>📝 Kiểm tra trực tuyến</h2>
+            <p class="subject-intro">
+                Lựa chọn môn học để bắt đầu luyện tập.
+            </p>
+
+            <div class="subject-grid">
+
+                <button class="subject-card" data-subject="math">
+                    <span>📐</span>
+                    <h3>Toán học</h3>
+                    <p>Hàm số, nguyên hàm và các kiến thức Toán 12.</p>
+                    <small>BẮT ĐẦU →</small>
+                </button>
+
+                <button class="subject-card" data-subject="physics">
+                    <span>⚡</span>
+                    <h3>Vật lí</h3>
+                    <p>Vật lí và các hiện tượng tự nhiên.</p>
+                    <small>BẮT ĐẦU →</small>
+                </button>
+
+                <button class="subject-card" data-subject="chemistry">
+                    <span>🧪</span>
+                    <h3>Hóa học</h3>
+                    <p>Este, carbohydrate và các hợp chất.</p>
+                    <small>BẮT ĐẦU →</small>
+                </button>
+
+                <button class="subject-card" data-subject="literature">
+                    <span>📖</span>
+                    <h3>Ngữ văn</h3>
+                    <p>Đọc hiểu và kiến thức nghị luận.</p>
+                    <small>BẮT ĐẦU →</small>
+                </button>
+
+                <button class="subject-card" data-subject="english">
+                    <span>🌐</span>
+                    <h3>Tiếng Anh</h3>
+                    <p>Ngữ pháp và từ vựng.</p>
+                    <small>BẮT ĐẦU →</small>
+                </button>
+
+                <button class="subject-card" data-subject="biology">
+                    <span>🧬</span>
+                    <h3>Sinh học</h3>
+                    <p>Di truyền và kiến thức sinh học.</p>
+                    <small>BẮT ĐẦU →</small>
+                </button>
+
+                <button class="subject-card" data-subject="history">
+                    <span>🏛️</span>
+                    <h3>Lịch sử</h3>
+                    <p>Lịch sử Việt Nam và thế giới.</p>
+                    <small>BẮT ĐẦU →</small>
+                </button>
+
+            </div>
+        </div>
+
+        <div id="quiz-area" hidden>
+            <button class="back-btn" id="back-subject">
+                ← Quay lại chọn môn
+            </button>
+
+            <div class="quiz-box">
+                <span class="tag">ONLINE QUIZ ✨</span>
+                <h2 id="subject-title"></h2>
+                <p id="progress">Câu 1</p>
+                <h3 id="question"></h3>
+                <div id="answers"></div>
+                <p id="feedback"></p>
+
+                <button id="next" class="primary" hidden>
+                    Câu tiếp theo →
+                </button>
+
+                <h3 id="result"></h3>
+
+                <button id="restart" class="primary" hidden>
+                    Làm lại bài kiểm tra
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- GAMING ZONE -->
+    <section id="game" class="page">
+
+        <div id="game-menu">
+            <div class="game-heading">
+                <span class="tag">STUDY HUB · GAMING ZONE ✨</span>
+                <h2>Đấu trường tri thức</h2>
+                <p>Học tập, thử thách bản thân và chinh phục kiến thức!</p>
+            </div>
+
+            <div class="game-grid">
+
+                <button class="game-card speed" data-game="speed">
+                    <span class="game-icon">⚡</span>
+                    <span class="game-label">GAME 01</span>
+                    <h3>Đấu trường tốc độ</h3>
+                    <p>Trả lời nhanh trong 60 giây. Tích lũy combo và điểm thưởng.</p>
+                    <b>CHƠI NGAY →</b>
+                </button>
+
+                <button class="game-card millionaire" data-game="millionaire">
+                    <span class="game-icon">🏆</span>
+                    <span class="game-label">GAME 02</span>
+                    <h3>Ai là triệu phú?</h3>
+                    <p>Vượt qua 15 câu hỏi và chinh phục các mốc thưởng.</p>
+                    <b>CHƠI NGAY →</b>
+                </button>
+
+                <button class="game-card mystery" data-game="mystery">
+                    <span class="game-icon">🔐</span>
+                    <span class="game-label">GAME 03</span>
+                    <h3>Giải mã bí mật</h3>
+                    <p>Khám phá gợi ý và tìm ra từ khóa kiến thức bí ẩn.</p>
+                    <b>CHƠI NGAY →</b>
+                </button>
+
+                <button class="game-card matching" data-game="matching">
+                    <span class="game-icon">🧩</span>
+                    <span class="game-label">GAME 04</span>
+                    <h3>Thử thách ghép đôi</h3>
+                    <p>Ghép các cặp kiến thức tương ứng và thử thách trí nhớ.</p>
+                    <b>CHƠI NGAY →</b>
+                </button>
+
+            </div>
+        </div>
+      </section>
+        <!-- CHỌN MÔN -->
+        <div id="game-subject-menu" hidden>
+            <button class="back-btn" id="back-games">← Danh sách trò chơi</button>
+            <div class="game-heading">
+                <h2 id="selected-game-title"></h2>
+                <p>Hãy chọn môn học bạn muốn thử sức.</p>
+            </div>
+            <div class="subject-grid" id="game-subject-grid"></div>
+        </div>
+
+        <!-- KHU VỰC CHƠI -->
+        <div id="game-stage" hidden>
+            <button class="back-btn" id="back-game-subject">
+                ← Chọn môn khác
+            </button>
+
+            <div class="game-panel">
+                <div id="game-stage-content"></div>
+            </div>
+        </div>
+
+    </section>
+    <!-- KẾT THÚC TRANG TRÒ CHƠI -->
+
+
+    <!-- KHO KIẾN THỨC -->
+    <section id="knowledge" class="page">
+
+        <div class="knowledge-container">
+
+            <div class="knowledge-header">
+                <div>
+                    <h1>📚 KHO KIẾN THỨC</h1>
+                    <p>Không gian lưu trữ tài liệu học tập của bạn.</p>
+                </div>
+
+                <div class="knowledge-count">
+                    <span id="file-count">0</span>
+                    <small>tài liệu đã lưu</small>
+                </div>
+            </div>
+
+            <div class="upload-area">
+                <div class="upload-icon">☁️</div>
+                <h2>Lưu tài liệu của bạn</h2>
+                <p>Chọn tài liệu từ thiết bị để thêm vào kho kiến thức.</p>
+
+                <input
+                    type="file"
+                    id="knowledge-files"
+                    multiple
+                    hidden
+                >
+
+                <button
+                    class="upload-button"
+                    onclick="document.getElementById('knowledge-files').click()"
+                >
+                    + Chọn tài liệu
+                </button>
+
+                <p class="file-note">
+                    Hỗ trợ PDF, DOCX, PPTX, XLSX, TXT, JPG, PNG và các định dạng khác.
+                </p>
+            </div>
+
+            <div class="knowledge-tools">
+                <input
+                    type="text"
+                    id="knowledge-search"
+                    placeholder="🔍 Tìm kiếm tài liệu..."
+                >
+
+                <select id="knowledge-filter">
+                    <option value="all">Tất cả tài liệu</option>
+                    <option value="pdf">PDF</option>
+                    <option value="document">Word / TXT</option>
+                    <option value="presentation">PowerPoint</option>
+                    <option value="spreadsheet">Excel</option>
+                    <option value="image">Hình ảnh</option>
+                    <option value="other">Khác</option>
+                </select>
+            </div>
+
+            <div class="knowledge-list-header">
+                <h2>Tài liệu của tôi</h2>
+                <span id="knowledge-status">Đang tải...</span>
+            </div>
+
+            <div id="knowledge-list" class="knowledge-list"></div>
+
+        </div>
+
+    </section>
+
+</main>
+
+<footer>
+    <p>© 2026 STUDY HUB | Learn - Practice - Grow ✨</p>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
