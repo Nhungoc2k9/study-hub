@@ -1290,8 +1290,13 @@ async function uploadKnowledgeFiles(fileList) {
             continue;
         }
 
-        const safeName = file.name.replace(/[\/\\]/g, "_");
-
+        const safeName = file.name
+    .replace(/đ/g, "d")
+    .replace(/Đ/g, "D")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-zA-Z0-9._-]/g, "_")
+    .replace(/_+/g, "_");
         const uniqueName =
             Date.now() + "-" +
             crypto.randomUUID() + "-" +
