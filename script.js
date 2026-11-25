@@ -989,7 +989,7 @@ const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_RjYLHiWb9YkxUnIMvFS8ig_ms1Hyfhl
 
 const BUCKET_NAME = "study-documents";
 
-const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20 MB
+const MAX_FILE_SIZE = 1000 * 1024; // 1000 KB
 
 const supabaseClient = window.supabase.createClient(
     SUPABASE_URL,
