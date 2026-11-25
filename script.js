@@ -1,4 +1,3 @@
-
 // ĐIỀU KHIỂN CHUYỂN TRANG
 function navigateToPage(pageName) {
     const pages = document.querySelectorAll(".page");
@@ -979,102 +978,54 @@ function showGameResult(title, score, description) {
 }
 // ======================================
 // STUDY HUB - KNOWLEDGE STORAGE
-// Lưu tài liệu bằng IndexedDB
+// LƯU TRỮ TÀI LIỆU CHUNG BẰNG SUPABASE
 // ======================================
 
-const DB_NAME = "StudyHubKnowledge";
-const DB_VERSION = 1;
-const STORE_NAME = "documents";
+// 1. THÔNG TIN KẾT NỐI SUPABASE
 
-let knowledgeDB;
+const SUPABASE_URL = "https://pywgvdidrxpujhdwmitw.supabase.co";
 
-// Mở cơ sở dữ liệu
-function openKnowledgeDB() {
-    return new Promise((resolve, reject) => {
-        const request = indexedDB.open(DB_NAME, DB_VERSION);
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_RjYLHiWb9YkxUnIMvFS8ig_ms1Hyfhl";
 
-        request.onupgradeneeded = function(event) {
-            const db = event.target.result;
+const BUCKET_NAME = "study-documents";
 
-            if (!db.objectStoreNames.contains(STORE_NAME)) {
-                db.createObjectStore(STORE_NAME, {
-                    keyPath: "id",
-                    autoIncrement: true
-                });
-            }
-        };
+const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20 MB
 
-        request.onsuccess = function(event) {
-            knowledgeDB = event.target.result;
-            resolve(knowledgeDB);
-        };
+const supabaseClient = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_PUBLISHABLE_KEY
+);
 
-        request.onerror = function() {
-            reject(request.error);
-        };
-    });
-}
 
-// Lấy danh sách tài liệu
-function getKnowledgeFiles() {
-    return new Promise((resolve, reject) => {
-        const transaction = knowledgeDB.transaction(
-            STORE_NAME,
-            "readonly"
-        );
+// 2. CÁC ĐỊNH DẠNG ĐƯỢC PHÉP TẢI LÊN
 
-        const store = transaction.objectStore(STORE_NAME);
-        const request = store.getAll();
+const MIME_BY_EXTENSION = {
+    pdf: "application/pdf",
 
-        request.onsuccess = () => resolve(request.result);
-        request.onerror = () => reject(request.error);
-    });
-}
+    doc: "application/msword",
+    docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
 
-// Lưu một tài liệu
-function saveKnowledgeFile(file) {
-    return new Promise((resolve, reject) => {
-        const transaction = knowledgeDB.transaction(
-            STORE_NAME,
-            "readwrite"
-        );
+    ppt: "application/vnd.ms-powerpoint",
+    pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
 
-        const store = transaction.objectStore(STORE_NAME);
+    xls: "application/vnd.ms-excel",
+    xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 
-        const documentData = {
-            name: file.name,
-            type: file.type,
-            size: file.size,
-            date: new Date().toISOString(),
-            file: file
-        };
+    txt: "text/plain",
+    csv: "text/csv",
 
-        const request = store.add(documentData);
+    jpg: "image/jpeg",
+    jpeg: "image/jpeg",
+    png: "image/png",
+    webp: "image/webp"
+};
 
-        request.onsuccess = () => resolve(request.result);
-        request.onerror = () => reject(request.error);
-    });
-}
 
-// Xóa tài liệu
-function deleteKnowledgeFile(id) {
-    return new Promise((resolve, reject) => {
-        const transaction = knowledgeDB.transaction(
-            STORE_NAME,
-            "readwrite"
-        );
+// 3. ĐỊNH DẠNG DUNG LƯỢNG
 
-        const store = transaction.objectStore(STORE_NAME);
-        const request = store.delete(Number(id));
-
-        request.onsuccess = () => resolve();
-        request.onerror = () => reject(request.error);
-    });
-}
-
-// Định dạng dung lượng
 function formatFileSize(bytes) {
     if (bytes < 1024) return bytes + " B";
+
     if (bytes < 1024 * 1024) {
         return (bytes / 1024).toFixed(1) + " KB";
     }
@@ -1082,13 +1033,15 @@ function formatFileSize(bytes) {
     return (bytes / (1024 * 1024)).toFixed(2) + " MB";
 }
 
-// Nhận diện loại tài liệu
-function getFileCategory(file) {
-    const ext = file.name.split(".").pop().toLowerCase();
+
+// 4. NHẬN DIỆN LOẠI TÀI LIỆU
+
+function getFileCategory(fileName) {
+    const ext = fileName.split(".").pop().toLowerCase();
 
     if (ext === "pdf") return "pdf";
 
-    if (["doc", "docx", "txt", "rtf"].includes(ext)) {
+    if (["doc", "docx", "txt"].includes(ext)) {
         return "document";
     }
 
@@ -1100,14 +1053,16 @@ function getFileCategory(file) {
         return "spreadsheet";
     }
 
-    if (["png", "jpg", "jpeg", "gif", "webp"].includes(ext)) {
+    if (["jpg", "jpeg", "png", "webp"].includes(ext)) {
         return "image";
     }
 
     return "other";
 }
 
-// Biểu tượng tài liệu
+
+// 5. BIỂU TƯỢNG TÀI LIỆU
+
 function getFileIcon(category) {
     const icons = {
         pdf: "📕",
@@ -1121,13 +1076,55 @@ function getFileIcon(category) {
     return icons[category] || "📁";
 }
 
-// Hiển thị danh sách
+
+// 6. LÀM SẠCH TÊN FILE HIỂN THỊ
+
+function escapeKnowledgeText(value) {
+    return String(value).replace(/[&<>"']/g, character => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
+    })[character]);
+}
+
+
+// 7. LẤY DANH SÁCH TÀI LIỆU TỪ SUPABASE
+
+async function getKnowledgeFiles() {
+    const { data, error } = await supabaseClient
+        .storage
+        .from(BUCKET_NAME)
+        .list("", {
+            limit: 1000,
+            offset: 0,
+            sortBy: {
+                column: "created_at",
+                order: "desc"
+            }
+        });
+
+    if (error) {
+        throw error;
+    }
+
+    // Bỏ qua các thư mục, chỉ lấy tệp
+    return (data || []).filter(file => file.id && file.name);
+}
+
+
+// 8. HIỂN THỊ DANH SÁCH TÀI LIỆU
+
 async function renderKnowledgeFiles() {
     const list = document.getElementById("knowledge-list");
     const count = document.getElementById("file-count");
     const status = document.getElementById("knowledge-status");
 
     if (!list || !count || !status) return;
+
+    status.textContent = "Đang tải tài liệu...";
+    list.innerHTML = "";
 
     try {
         const files = await getKnowledgeFiles();
@@ -1143,7 +1140,7 @@ async function renderKnowledgeFiles() {
             .value;
 
         const filteredFiles = files.filter(file => {
-            const category = getFileCategory(file);
+            const category = getFileCategory(file.name);
 
             const matchesName = file.name
                 .toLowerCase()
@@ -1171,10 +1168,17 @@ async function renderKnowledgeFiles() {
         }
 
         list.innerHTML = filteredFiles.map(file => {
-            const category = getFileCategory(file);
+            const category = getFileCategory(file.name);
+
+            const fileDate = file.created_at
+                ? new Date(file.created_at).toLocaleDateString("vi-VN")
+                : "Không rõ ngày";
+
+            const fileSize = Number(file.metadata?.size || 0);
 
             return `
                 <div class="knowledge-card">
+
                     <div class="knowledge-file-icon">
                         ${getFileIcon(category)}
                     </div>
@@ -1184,122 +1188,173 @@ async function renderKnowledgeFiles() {
                     </h3>
 
                     <p>
-                        ${formatFileSize(file.size)}
-                        · ${new Date(file.date).toLocaleDateString("vi-VN")}
+                        ${formatFileSize(fileSize)}
+                        · ${fileDate}
                     </p>
 
                     <div class="knowledge-actions">
+
                         <button
                             class="knowledge-open"
-                            onclick="openKnowledgeFile(${file.id})"
+                            data-file-path="${escapeKnowledgeText(file.name)}"
+                            data-file-action="open"
                         >
-                            Mở / Tải xuống
+                            Mở tài liệu
                         </button>
 
                         <button
-                            class="knowledge-delete"
-                            onclick="removeKnowledgeFile(${file.id})"
+                            class="knowledge-open"
+                            data-file-path="${escapeKnowledgeText(file.name)}"
+                            data-file-action="download"
                         >
-                            Xóa
+                            Tải xuống
                         </button>
+
                     </div>
+
                 </div>
             `;
         }).join("");
 
     } catch (error) {
-        console.error(error);
+        console.error("Lỗi tải danh sách:", error);
+
         status.textContent = "Không thể tải danh sách tài liệu.";
+
+        list.innerHTML = `
+            <div class="knowledge-empty">
+                <h3>Không thể kết nối kho tài liệu</h3>
+                <p>Vui lòng tải lại trang hoặc thử lại sau.</p>
+            </div>
+        `;
     }
 }
 
-// Tránh chèn nội dung tên file thành HTML
-function escapeKnowledgeText(value) {
-    return String(value).replace(/[&<>"']/g, character => ({
-        "&": "&amp;",
-        "<": "&lt;",
-        ">": "&gt;",
-        '"': "&quot;",
-        "'": "&#039;"
-    })[character]);
-}
 
-// Mở hoặc tải tài liệu
-async function openKnowledgeFile(id) {
-    const files = await getKnowledgeFiles();
-    const selectedFile = files.find(file => file.id === Number(id));
+// 9. MỞ HOẶC TẢI TÀI LIỆU
 
-    if (!selectedFile) {
-        alert("Không tìm thấy tài liệu.");
-        return;
+document.getElementById("knowledge-list")
+    .addEventListener("click", function(event) {
+
+        const button = event.target.closest("[data-file-action]");
+
+        if (!button) return;
+
+        const path = button.dataset.filePath;
+        const action = button.dataset.fileAction;
+
+        let options = {};
+
+        if (action === "download") {
+            options.download = true;
+        }
+
+        const { data } = supabaseClient
+            .storage
+            .from(BUCKET_NAME)
+            .getPublicUrl(path, options);
+
+        if (!data || !data.publicUrl) {
+            alert("Không thể lấy đường dẫn tài liệu.");
+            return;
+        }
+
+        window.open(data.publicUrl, "_blank", "noopener,noreferrer");
+    });
+
+
+// 10. TẢI TÀI LIỆU LÊN KHO CHUNG
+
+async function uploadKnowledgeFiles(fileList) {
+    const status = document.getElementById("knowledge-status");
+
+    const files = Array.from(fileList);
+
+    if (files.length === 0) return;
+
+    let successCount = 0;
+    let errorMessages = [];
+
+    for (const file of files) {
+        const extension = file.name.split(".").pop().toLowerCase();
+
+        // Kiểm tra định dạng
+        if (!MIME_BY_EXTENSION[extension]) {
+            errorMessages.push(file.name + ": Định dạng không được hỗ trợ.");
+            continue;
+        }
+
+        // Kiểm tra dung lượng
+        if (file.size > MAX_FILE_SIZE) {
+            errorMessages.push(file.name + ": Vượt quá giới hạn 20 MB.");
+            continue;
+        }
+
+        const safeName = file.name.replace(/[\/\\]/g, "_");
+
+        const uniqueName =
+            Date.now() + "-" +
+            crypto.randomUUID() + "-" +
+            safeName;
+
+        status.textContent =
+            `Đang tải lên: ${successCount + 1}/${files.length}`;
+
+        try {
+            const { error } = await supabaseClient
+                .storage
+                .from(BUCKET_NAME)
+                .upload(uniqueName, file, {
+                    cacheControl: "3600",
+                    contentType: MIME_BY_EXTENSION[extension],
+                    upsert: false
+                });
+
+            if (error) {
+                throw error;
+            }
+
+            successCount++;
+
+        } catch (error) {
+            console.error("Lỗi tải tệp:", error);
+
+            errorMessages.push(
+                file.name + ": " + error.message
+            );
+        }
     }
 
-    const blob = new Blob(
-        [selectedFile.file],
-        { type: selectedFile.type || "application/octet-stream" }
-    );
+    await renderKnowledgeFiles();
 
-    const url = URL.createObjectURL(blob);
+    let message = `Đã tải lên thành công ${successCount}/${files.length} tài liệu.`;
 
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = selectedFile.name;
-    link.target = "_blank";
-    link.rel = "noopener";
-    link.click();
-
-    setTimeout(() => URL.revokeObjectURL(url), 60000);
-}
-
-// Xóa tài liệu
-async function removeKnowledgeFile(id) {
-    const confirmed = confirm(
-        "Bạn có chắc chắn muốn xóa tài liệu này không?"
-    );
-
-    if (!confirmed) return;
-
-    try {
-        await deleteKnowledgeFile(id);
-        await renderKnowledgeFiles();
-    } catch (error) {
-        alert("Không thể xóa tài liệu.");
-        console.error(error);
+    if (errorMessages.length > 0) {
+        message += "\n\nMột số tài liệu chưa tải được:\n";
+        message += errorMessages.join("\n");
     }
+
+    alert(message);
 }
 
-// Sự kiện tải tài liệu
-document.addEventListener("DOMContentLoaded", async function() {
+
+// 11. KHỞI ĐỘNG KHO KIẾN THỨC
+
+document.addEventListener("DOMContentLoaded", function() {
+
     const fileInput = document.getElementById("knowledge-files");
 
     if (!fileInput) return;
 
-    try {
-        await openKnowledgeDB();
-        await renderKnowledgeFiles();
-    } catch (error) {
-        console.error(error);
-        alert("Trình duyệt không thể khởi tạo kho tài liệu.");
-        return;
-    }
+    renderKnowledgeFiles();
 
     fileInput.addEventListener("change", async function() {
-        const files = Array.from(this.files);
 
-        if (files.length === 0) return;
+        const files = this.files;
 
-        try {
-            for (const file of files) {
-                await saveKnowledgeFile(file);
-            }
+        if (!files || files.length === 0) return;
 
-            alert(`Đã lưu thành công ${files.length} tài liệu!`);
-            await renderKnowledgeFiles();
-
-        } catch (error) {
-            console.error(error);
-            alert("Có lỗi khi lưu tài liệu. Có thể dung lượng lưu trữ đã đầy.");
-        }
+        await uploadKnowledgeFiles(files);
 
         this.value = "";
     });
@@ -1311,4 +1366,5 @@ document.addEventListener("DOMContentLoaded", async function() {
     document
         .getElementById("knowledge-filter")
         .addEventListener("change", renderKnowledgeFiles);
+
 });
